@@ -1,34 +1,26 @@
 version: '3.9'
 services:
-  caddy:
-    container_name: caddy
-    image: caddy:2
-    network_mode: host
-    depends_on:
-      - pds
-    restart: unless-stopped
-    volumes:
-      - type: bind
-        source: /pds/caddy/data
-        target: /data
-      - type: bind
-        source: /pds/caddy/etc/caddy
-        target: /etc/caddy
   pds:
     container_name: pds
     image: ghcr.io/bluesky-social/pds:latest
-    network_mode: host
+    networks:
+      - web
     restart: unless-stopped
     volumes:
       - type: bind
-        source: /pds
+        source: /opt/docker-sky/pds
         target: /pds
     env_file:
-      - /pds/pds.env
+      - /opt/docker-sky/pds/pds.env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sky.rule=Host(`example.exe`)"
+      - "traefik.http.routers.sky.tls=true"
+      - "traefik.http.routers.sky.entrypoints=websecure,web"
+      - "traefik.http.services.sky.loadbalancer.server.port=3000"
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower:latest
-    network_mode: host
     volumes:
       - type: bind
         source: /var/run/docker.sock
@@ -37,3 +29,7 @@ services:
     environment:
       WATCHTOWER_CLEANUP: true
       WATCHTOWER_SCHEDULE: "@midnight"
+
+networks:
+  web:
+    external: true
