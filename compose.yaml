@@ -15,6 +15,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.sky.rule=Host(`example.exe`)"
+      - "traefik.http.routers.sky.rule=HostRegexp(`example.exe`,`{subdomain:[a-z]+}.example.exe`)"
       - "traefik.http.routers.sky.tls=true"
       - "traefik.http.routers.sky.entrypoints=websecure,web"
       - "traefik.http.services.sky.loadbalancer.server.port=3000"
